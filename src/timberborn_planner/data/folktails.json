@@ -1,0 +1,40 @@
+{
+    "buildings": {
+        "lumber_mill": {
+            "name": "Lumber Mill",
+            "category": "industry",
+            "construction_cost": {
+                "logs": 20
+            },
+            "science_cost": {
+                "science": 20
+            },
+            "workers": 2,
+            "inputs_per_day": {
+                "logs": 10
+            },
+            "outputs_per_day": {
+                "planks": 5
+            },
+            "power_required": 50
+        },
+        "gear_workshop": {
+            "name": "Gear Workshop",
+            "category": "industry",
+            "construction_cost": {
+                "planks": 30
+            },
+            "science_cost": {
+                "science": 30
+            },
+            "workers": 4,
+            "inputs_per_day": {
+                "planks": 10
+            },
+            "outputs_per_day": {
+                "gears": 5
+            },
+            "power_required": 120
+        }
+    }
+}

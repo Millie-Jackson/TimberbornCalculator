@@ -1,0 +1,53 @@
+{
+    "resources": {
+        "logs": {
+            "name": "Logs",
+            "emoji": "🪵",
+            "type": "raw_material"
+        },
+        "planks": {
+            "name": "Planks",
+            "emoji": "🟫",
+            "type": "processed_material"
+        },
+        "gears": {
+            "name": "Gears",
+            "emoji": "⚙️",
+            "type": "processed_material"
+        },
+        "water": {
+            "name": "Water",
+            "emoji": "💧",
+            "type": "liquid"
+        },
+        "carrots": {
+            "name": "Carrots",
+            "emoji": "🥕",
+            "type": "food"
+        },
+        "science": {
+            "name": "Science",
+            "emoji": "🧠",
+            "type": "science"
+        },
+        "power": {
+            "name": "Power",
+            "emoji": "⚡",
+            "type": "power"
+        }
+    },
+    "population": {
+        "adult": {
+            "food_per_day": 2,
+            "water_per_day": 2
+        },
+        "kit": {
+            "food_per_day": 1,
+            "water_per_day": 1
+        },
+        "bot": {
+            "food_per_day": 0,
+            "water_per_day": 0
+        }
+    }
+}
