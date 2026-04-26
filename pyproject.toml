@@ -2,7 +2,7 @@
 name = "starter-project"
 version = "0.1.0"
 description = "A starter Python project with Poetry and GitHub Actions."
-authors = ["Millie <your@email.com>"]
+authors = ["Millie <millie.jackson1@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
@@ -14,3 +14,7 @@ pytest = "^7.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
