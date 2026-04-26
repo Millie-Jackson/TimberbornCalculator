@@ -1,5 +1,6 @@
 # TimberbornCalculator/tests/test_loaders.py
 
+import pytest
 from timberborn_planner.services.loaders import (
     load_faction_data,
     load_game_data,
@@ -7,6 +8,7 @@ from timberborn_planner.services.loaders import (
     load_patch_meta,
     validate_faction_data,
     validate_global_data,
+    validate_patch_meta,
 )
 
 
@@ -47,28 +49,37 @@ def test_load_game_data_returns_combined_sections():
     assert "patch_meta" in data
 
 
+# .========================================================================
+# BLOCK 2 — Validation tests
+# .========================================================================
+
+
 def test_validate_global_data_rejects_missing_population():
 
     broken_data = {"resources": {}}
 
-    try:
+    with pytest.raises(ValueError, match="population"):
         validate_global_data(broken_data)
-    except ValueError as error:
-        assert "population" in str(error)
-    else:
-        raise AssertionError("Expected ValueError for missing population")
 
 
 def test_validate_faction_data_rejects_missing_buildings():
 
     broken_data = {}
 
-    try:
+    with pytest.raises(ValueError, match="buildings"):
         validate_faction_data(broken_data)
-    except ValueError as error:
-        assert "building" in str(error)
-    else:
-        raise AssertionError("Expected ValueError for missing buildings")
+
+
+def test_validate_patch_meta_rejects_missing_version():
+
+    broken_data = {
+        "game": "Timberborn",
+        "faction": "Folktails",
+        "notes": "Missing version",
+    }
+
+    with pytest.raises(ValueError, match="version"):
+        validate_patch_meta(broken_data)
 
 
 # END OF FILE
