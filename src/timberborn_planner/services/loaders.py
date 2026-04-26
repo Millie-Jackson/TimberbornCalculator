@@ -26,23 +26,76 @@ def _load_json_file(path: Path) -> dict[str, Any]:
     return data
 
 
+def _require_keys(
+    data: dict[str, Any],
+    required_keys: list[str],
+    section_name: str,
+) -> None:
+
+    missing_keys = [key for key in required_keys if key not in data]
+
+    if missing_keys:
+        raise ValueError(f"{section_name} is missing required keys: {missing_keys}")
+
+
+# .========================================================================
+# BLOCK 2 — Validation helpers
+# .========================================================================
+
+
+def validate_global_data(data: dict[str, Any]) -> None:
+
+    _require_keys(
+        data=data, required_keys=["resources", "population"], section_name="global.json"
+    )
+
+
+def validate_faction_data(data: dict[str, Any]) -> None:
+
+    _require_keys(data=data, required_keys=["buildings"], section_name="faction data")
+
+
+def validate_patch_meta(data: dict[str, Any]) -> None:
+
+    _require_keys(
+        data=data,
+        required_keys=["game", "version", "faction", "notes"],
+        section_name="patch_meta.json",
+    )
+
+
+# .========================================================================
+# BLOCK 3 — Public loaders
+# .========================================================================
+
+
 def load_global_data() -> dict[str, Any]:
-    return _load_json_file(DATA_DIR / "global.json")
+
+    data = _load_json_file(DATA_DIR / "global.json")
+    validate_global_data(data)
+
+    return data
 
 
 def load_patch_meta() -> dict[str, Any]:
-    return _load_json_file(DATA_DIR / "patch_meta.json")
+
+    data = _load_json_file(DATA_DIR / "patch_meta.json")
+    validate_patch_meta(data)
+
+    return data
 
 
 def load_faction_data(faction: str = "folktails") -> dict[str, Any]:
 
     filename = f"{faction.lower()}.json"
+    data = _load_json_file(DATA_DIR / filename)
+    validate_faction_data(data)
 
-    return _load_json_file(DATA_DIR / filename)
+    return data
 
 
 # .========================================================================
-# BLOCK 2 — Combined loader
+# BLOCK 4 — Combined loader
 # .========================================================================
 
 

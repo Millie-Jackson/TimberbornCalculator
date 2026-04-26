@@ -5,6 +5,8 @@ from timberborn_planner.services.loaders import (
     load_game_data,
     load_global_data,
     load_patch_meta,
+    validate_faction_data,
+    validate_global_data,
 )
 
 
@@ -43,6 +45,30 @@ def test_load_game_data_returns_combined_sections():
     assert "global" in data
     assert "faction" in data
     assert "patch_meta" in data
+
+
+def test_validate_global_data_rejects_missing_population():
+
+    broken_data = {"resources": {}}
+
+    try:
+        validate_global_data(broken_data)
+    except ValueError as error:
+        assert "population" in str(error)
+    else:
+        raise AssertionError("Expected ValueError for missing population")
+
+
+def test_validate_faction_data_rejects_missing_buildings():
+
+    broken_data = {}
+
+    try:
+        validate_faction_data(broken_data)
+    except ValueError as error:
+        assert "building" in str(error)
+    else:
+        raise AssertionError("Expected ValueError for missing buildings")
 
 
 # END OF FILE
