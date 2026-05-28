@@ -22,14 +22,47 @@ def build_overview_tab() -> None:
     with gr.Tab("Overview"):
         with gr.Row():
             with gr.Column(scale=1):
-                adults = gr.Number(label="Adult beavers", value=10, precision=0)
-                kits = gr.Number(label="Kits", value=2, precision=0)
-                bots = gr.Number(label="Bots", value=0, precision=0)
-                drought_days = gr.Number(label="Drought days", value=5, precision=0)
+                with gr.Group():
+                    gr.Markdown("## Population")
+                    adults = gr.Number(
+                        label="Adult Beavers",
+                        value=10,
+                        precision=0,
+                        minimum=0,
+                        step=1,
+                        info="Adults are your main workforce.",
+                    )
+                    kits = gr.Number(
+                        label="Kits",
+                        value=2,
+                        precision=0,
+                        minimum=0,
+                        step=1,
+                        info="Kits increase future growth pressure.",
+                    )
+                    bots = gr.Number(
+                        label="Bots",
+                        value=0,
+                        precision=0,
+                        minimum=0,
+                        step=1,
+                        info="Bots do not consume food or water.",
+                    )
+
+                gr.Markdown("## Drought Planning")
+                drought_days = gr.Number(
+                    label="Drought days",
+                    value=5,
+                    precision=0,
+                    minimum=0,
+                    step=1,
+                )
                 safety_buffer = gr.Number(
                     label="Safety buffer percentage",
                     value=20,
                     precision=0,
+                    minimum=0,
+                    step=1,
                 )
                 nerdy_mode = gr.Checkbox(label="Nerdy Mode", value=False)
                 plan_button = gr.Button("Update overview")
