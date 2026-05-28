@@ -71,7 +71,11 @@ def build_overview_tab() -> None:
                         step=1,
                         info="Extra reserve added on top of the minimum need.",
                     )
-                nerdy_mode = gr.Checkbox(label="Nerdy Mode", value=False)
+                nerdy_mode = gr.Checkbox(
+                    label="Nerdy Mode",
+                    value=False,
+                    info="Show detailed breakdowns and assumptions.",
+                )
                 plan_button = gr.Button("Update overview")
 
             with gr.Column(scale=2):
@@ -147,7 +151,7 @@ def build_overview_sections(
 
     return (
         _population_section(colony, nerdy_mode),
-        _daily_needs_section(food_per_day, water_per_day, nerdy_mode),
+        _daily_needs_section(food_per_day, water_per_day, colony, global_data, nerdy_mode),
         _drought_reserves_section(food_reserve, water_reserve, colony, nerdy_mode),
         _housing_section(housing_need, nerdy_mode),
         _bots_section(bot_support.bot_count, bot_support.status, nerdy_mode),
@@ -178,6 +182,8 @@ def _population_section(colony: ColonyInputs, nerdy_mode: bool) -> str:
 def _daily_needs_section(
     food_per_day: float,
     water_per_day: float,
+    colony: ColonyInputs,
+    global_data: dict[str, Any],
     nerdy_mode: bool,
 ) -> str:
     rows = [
@@ -187,7 +193,13 @@ def _daily_needs_section(
 
     details = []
     if nerdy_mode:
-        details.append("Adults and kits consume food and water; bots do not.")
+        details.extend(
+            [
+                _consumption_formula(colony, global_data, "food_per_day", "Food"),
+                _consumption_formula(colony, global_data, "water_per_day", "Water"),
+                "Adults and kits consume food and water; bots currently add 0 to both.",
+            ]
+        )
 
     return _overview_card("Daily Needs", "Baseline daily colony demand.", rows, details)
 
@@ -208,7 +220,14 @@ def _drought_reserves_section(
     details = []
     if nerdy_mode:
         multiplier = 1 + colony.safety_buffer / 100
-        details.append(f"Reserve multiplier: {_format_number(multiplier)}")
+        details.extend(
+            [
+                f"Drought days: {colony.drought_days}",
+                f"Safety buffer percentage: {_format_number(colony.safety_buffer)}%",
+                f"Reserve multiplier: {_format_number(multiplier)}",
+                "Reserve formula: daily need x drought days x reserve multiplier.",
+            ]
+        )
 
     return _overview_card(
         "Drought Reserves",
@@ -223,7 +242,10 @@ def _housing_section(housing_need: int, nerdy_mode: bool) -> str:
 
     details = []
     if nerdy_mode:
-        details.append("Housing currently counts adults and kits, excluding bots.")
+        details.append(
+            "Housing formula: adults + kits. Bots are excluded because bot housing is not "
+            "modelled in this early slice."
+        )
 
     return _overview_card(
         "Housing",
@@ -241,7 +263,10 @@ def _bots_section(bot_count: int, status: str, nerdy_mode: bool) -> str:
 
     details = []
     if nerdy_mode:
-        details.append("Bot-specific support will be expanded in a later planning step.")
+        details.append(
+            "Bot support is an early placeholder; later planning will add bot-specific "
+            "fuel, buildings, and failure warnings."
+        )
 
     return _overview_card("Bots", "Automation population support.", rows, details)
 
@@ -259,10 +284,36 @@ def _kit_growth_section(kit_guidance: Any, nerdy_mode: bool) -> str:
             [
                 f"Current kits: {kit_guidance.current_kits}",
                 f"Biological population: {kit_guidance.biological_population}",
+                "Thresholds: 0-20% OK, over 20-30% caution, over 30% warning.",
             ]
         )
 
     return _overview_card("Kit Growth", "Growth pressure and early warnings.", rows, details)
+
+
+def _consumption_formula(
+    colony: ColonyInputs,
+    global_data: dict[str, Any],
+    rate_name: str,
+    label: str,
+) -> str:
+    adult_rate = _population_rate(global_data, "adult", rate_name)
+    kit_rate = _population_rate(global_data, "kit", rate_name)
+    bot_rate = _population_rate(global_data, "bot", rate_name)
+
+    return (
+        f"{label} formula: adults {colony.adults} x {_format_number(adult_rate)} + "
+        f"kits {colony.kits} x {_format_number(kit_rate)} + "
+        f"bots {colony.bots} x {_format_number(bot_rate)}."
+    )
+
+
+def _population_rate(
+    global_data: dict[str, Any],
+    population_type: str,
+    rate_name: str,
+) -> float:
+    return float(global_data["population"][population_type][rate_name])
 
 
 def _overview_card(
