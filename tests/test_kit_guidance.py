@@ -36,6 +36,20 @@ def test_ratio_above_twenty_percent_returns_caution():
     )
 
 
+def test_ratio_at_twenty_percent_returns_ok():
+    guidance = calculate_kit_guidance(ColonyInputs(adults=8, kits=2))
+
+    assert guidance.kit_ratio == 0.2
+    assert guidance.status == "OK"
+
+
+def test_ratio_at_thirty_percent_returns_caution():
+    guidance = calculate_kit_guidance(ColonyInputs(adults=7, kits=3))
+
+    assert guidance.kit_ratio == 0.3
+    assert guidance.status == "caution"
+
+
 def test_ratio_above_thirty_percent_returns_warning():
     guidance = calculate_kit_guidance(ColonyInputs(adults=10, kits=5))
 
@@ -51,6 +65,13 @@ def test_recommended_max_kits_uses_biological_population():
 
     assert guidance.biological_population == 25
     assert guidance.recommended_max_kits == 5
+
+
+def test_recommended_max_kits_rounds_down():
+    guidance = calculate_kit_guidance(ColonyInputs(adults=12, kits=6))
+
+    assert guidance.biological_population == 18
+    assert guidance.recommended_max_kits == 3
 
 
 def test_bots_do_not_affect_kit_ratio():

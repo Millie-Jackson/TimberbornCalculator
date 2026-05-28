@@ -21,6 +21,18 @@ def test_kit_ratio_uses_total_population():
     assert colony.kit_ratio == 0.3
 
 
+def test_kit_ratio_includes_bots_in_colony_population_ratio():
+    colony = ColonyInputs(adults=7, kits=3, bots=5)
+
+    assert colony.kit_ratio == 3 / 15
+
+
+def test_working_population_excludes_kits_even_when_kits_are_present():
+    colony = ColonyInputs(adults=4, kits=6, bots=2)
+
+    assert colony.working_population == 6
+
+
 def test_default_values_describe_an_empty_colony():
     colony = ColonyInputs()
 
