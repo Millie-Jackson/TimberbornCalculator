@@ -1,5 +1,6 @@
 """Overview tab for the Gradio app."""
 
+from html import escape
 from typing import Any
 
 import gradio as gr
@@ -155,24 +156,23 @@ def build_overview_sections(
 
 
 def _population_section(colony: ColonyInputs, nerdy_mode: bool) -> str:
-    lines = [
-        "## Population",
-        f"Total population: **{colony.total_population}**",
-        f"Working population: **{colony.working_population}**",
+    rows = [
+        ("Total population", str(colony.total_population)),
+        ("Working population", str(colony.working_population)),
     ]
 
+    details = []
     if nerdy_mode:
-        lines.extend(
+        details.extend(
             [
-                "",
-                f"Adults: **{colony.adults}**",
-                f"Kits: **{colony.kits}**",
-                f"Bots: **{colony.bots}**",
-                f"Colony kit ratio: **{_format_percent(colony.kit_ratio)}**",
+                f"Adults: {colony.adults}",
+                f"Kits: {colony.kits}",
+                f"Bots: {colony.bots}",
+                f"Colony kit ratio: {_format_percent(colony.kit_ratio)}",
             ]
         )
 
-    return "\n\n".join(lines)
+    return _overview_card("Population", "Colony headcount at a glance.", rows, details)
 
 
 def _daily_needs_section(
@@ -180,17 +180,16 @@ def _daily_needs_section(
     water_per_day: float,
     nerdy_mode: bool,
 ) -> str:
-    lines = [
-        "## Daily Needs",
-        f"Food per day: **{_format_number(food_per_day)}**",
-        f"Water per day: **{_format_number(water_per_day)}**",
+    rows = [
+        ("Food / day", _format_number(food_per_day)),
+        ("Water / day", _format_number(water_per_day)),
     ]
 
+    details = []
     if nerdy_mode:
-        lines.append("")
-        lines.append("Adults and kits consume food and water; bots do not.")
+        details.append("Adults and kits consume food and water; bots do not.")
 
-    return "\n\n".join(lines)
+    return _overview_card("Daily Needs", "Baseline daily colony demand.", rows, details)
 
 
 def _drought_reserves_section(
@@ -199,72 +198,104 @@ def _drought_reserves_section(
     colony: ColonyInputs,
     nerdy_mode: bool,
 ) -> str:
-    lines = [
-        "## Drought Reserves",
-        f"Food reserve: **{_format_number(food_reserve)}**",
-        f"Water reserve: **{_format_number(water_reserve)}**",
+    rows = [
+        ("Food reserve", _format_number(food_reserve)),
+        ("Water reserve", _format_number(water_reserve)),
+        ("Drought days", str(colony.drought_days)),
+        ("Safety buffer", f"{_format_number(colony.safety_buffer)}%"),
     ]
 
+    details = []
     if nerdy_mode:
         multiplier = 1 + colony.safety_buffer / 100
-        lines.extend(
-            [
-                "",
-                f"Drought days: **{colony.drought_days}**",
-                f"Safety buffer: **{_format_number(colony.safety_buffer)}%**",
-                f"Reserve multiplier: **{_format_number(multiplier)}**",
-            ]
-        )
+        details.append(f"Reserve multiplier: {_format_number(multiplier)}")
 
-    return "\n\n".join(lines)
+    return _overview_card(
+        "Drought Reserves",
+        "Targets for surviving dry spells.",
+        rows,
+        details,
+    )
 
 
 def _housing_section(housing_need: int, nerdy_mode: bool) -> str:
-    lines = [
-        "## Housing",
-        f"Biological population needing housing: **{housing_need}**",
-    ]
+    rows = [("Needs housing", str(housing_need))]
 
+    details = []
     if nerdy_mode:
-        lines.append("")
-        lines.append("Housing currently counts adults and kits, excluding bots.")
+        details.append("Housing currently counts adults and kits, excluding bots.")
 
-    return "\n\n".join(lines)
+    return _overview_card(
+        "Housing",
+        "Current biological housing pressure.",
+        rows,
+        details,
+    )
 
 
 def _bots_section(bot_count: int, status: str, nerdy_mode: bool) -> str:
-    lines = [
-        "## Bots",
-        f"Bot count: **{bot_count}**",
-        status,
+    rows = [
+        ("Bot count", str(bot_count)),
+        ("Status", status),
     ]
 
+    details = []
     if nerdy_mode:
-        lines.append("")
-        lines.append("Bot-specific support will be expanded in a later planning step.")
+        details.append("Bot-specific support will be expanded in a later planning step.")
 
-    return "\n\n".join(lines)
+    return _overview_card("Bots", "Automation population support.", rows, details)
 
 
 def _kit_growth_section(kit_guidance: Any, nerdy_mode: bool) -> str:
-    lines = [
-        "## Kit Growth",
-        f"Status: **{kit_guidance.status}**",
-        kit_guidance.message,
+    rows = [
+        ("Kit ratio", _format_percent(kit_guidance.kit_ratio)),
+        ("Recommended max kits", str(kit_guidance.recommended_max_kits)),
+        ("Status", kit_guidance.status),
     ]
+    details = [kit_guidance.message]
 
     if nerdy_mode:
-        lines.extend(
+        details.extend(
             [
-                "",
-                f"Current kits: **{kit_guidance.current_kits}**",
-                f"Biological population: **{kit_guidance.biological_population}**",
-                f"Recommended max kits: **{kit_guidance.recommended_max_kits}**",
-                f"Kit ratio: **{_format_percent(kit_guidance.kit_ratio)}**",
+                f"Current kits: {kit_guidance.current_kits}",
+                f"Biological population: {kit_guidance.biological_population}",
             ]
         )
 
-    return "\n\n".join(lines)
+    return _overview_card("Kit Growth", "Growth pressure and early warnings.", rows, details)
+
+
+def _overview_card(
+    title: str,
+    summary: str,
+    rows: list[tuple[str, str]],
+    details: list[str] | None = None,
+) -> str:
+    detail_items = details or []
+    row_html = "\n".join(
+        (
+            '<div class="overview-card-row">'
+            f"<span>{escape(label)}</span>"
+            f"<strong>{escape(value)}</strong>"
+            "</div>"
+        )
+        for label, value in rows
+    )
+    details_html = ""
+
+    if detail_items:
+        details_html = "\n".join(
+            f'<p class="overview-card-detail">{escape(item)}</p>' for item in detail_items
+        )
+
+    return (
+        '<section class="overview-card">'
+        f"<h2>{escape(title)}</h2>"
+        f"<p>{escape(summary)}</p>"
+        f'<div class="overview-card-values">{row_html}</div>'
+        f"{details_html}"
+        "</section>"
+    )
 
 
 def _whole_number(value: int | float | None) -> int:

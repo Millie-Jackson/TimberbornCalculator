@@ -14,12 +14,16 @@ def test_overview_sections_return_short_summary_when_nerdy_mode_is_off():
     )
 
     assert len(sections) == 6
-    assert "Total population: **13**" in sections[0]
-    assert "Food per day: **22**" in sections[1]
-    assert "Food reserve: **132**" in sections[2]
-    assert "Biological population needing housing: **12**" in sections[3]
-    assert "Bot count: **1**" in sections[4]
-    assert "Status: **OK**" in sections[5]
+    assert '<section class="overview-card">' in sections[0]
+    assert "<h2>Population</h2>" in sections[0]
+    assert "<span>Total population</span><strong>13</strong>" in sections[0]
+    assert "<span>Food / day</span><strong>22</strong>" in sections[1]
+    assert "<span>Food reserve</span><strong>132</strong>" in sections[2]
+    assert "<span>Drought days</span><strong>5</strong>" in sections[2]
+    assert "<span>Safety buffer</span><strong>20%</strong>" in sections[2]
+    assert "<span>Needs housing</span><strong>12</strong>" in sections[3]
+    assert "<span>Bot count</span><strong>1</strong>" in sections[4]
+    assert "<span>Status</span><strong>OK</strong>" in sections[5]
     assert "Reserve multiplier" not in sections[2]
 
 
@@ -33,11 +37,11 @@ def test_overview_sections_include_breakdown_when_nerdy_mode_is_on():
         nerdy_mode=True,
     )
 
-    assert "Adults: **10**" in sections[0]
+    assert "Adults: 10" in sections[0]
     assert "Adults and kits consume food and water; bots do not." in sections[1]
-    assert "Reserve multiplier: **1.50**" in sections[2]
-    assert "Recommended max kits: **2**" in sections[5]
-    assert "Status: **caution**" in sections[5]
+    assert "Reserve multiplier: 1.50" in sections[2]
+    assert "<span>Recommended max kits</span><strong>2</strong>" in sections[5]
+    assert "<span>Status</span><strong>caution</strong>" in sections[5]
 
 
 def test_overview_sections_reject_negative_inputs():
