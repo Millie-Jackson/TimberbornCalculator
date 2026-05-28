@@ -49,21 +49,27 @@ def build_overview_tab() -> None:
                         info="Bots do not consume food or water.",
                     )
 
-                gr.Markdown("## Drought Planning")
-                drought_days = gr.Number(
-                    label="Drought days",
-                    value=5,
-                    precision=0,
-                    minimum=0,
-                    step=1,
-                )
-                safety_buffer = gr.Number(
-                    label="Safety buffer percentage",
-                    value=20,
-                    precision=0,
-                    minimum=0,
-                    step=1,
-                )
+                with gr.Group():
+                    gr.Markdown("## Drought Planning")
+                    drought_days = gr.Number(
+                        label="Drought Days",
+                        value=10,
+                        precision=0,
+                        minimum=0,
+                        step=1,
+                        info=(
+                            "How many days the colony should survive without fresh "
+                            "production."
+                        ),
+                    )
+                    safety_buffer = gr.Number(
+                        label="Safety Buffer %",
+                        value=20,
+                        precision=0,
+                        minimum=0,
+                        step=1,
+                        info="Extra reserve added on top of the minimum need.",
+                    )
                 nerdy_mode = gr.Checkbox(label="Nerdy Mode", value=False)
                 plan_button = gr.Button("Update overview")
 
