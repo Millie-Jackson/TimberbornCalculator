@@ -15,6 +15,12 @@ def test_resource_amounts_format_readably():
     assert format_resource_amounts({"logs": 20, "planks": 5}) == "20 logs and 5 planks"
 
 
+def test_summary_includes_building_name_and_quantity():
+    summary = _gear_workshop_summary()
+
+    assert "Adding 1 Gear Workshop" in summary
+
+
 def test_gear_workshop_summary_includes_workers():
     summary = _gear_workshop_summary()
 
@@ -60,6 +66,14 @@ def test_power_gap_is_included_when_power_balance_is_negative():
     )
 
     assert "Power gap: 120." in format_power_summary(plan_result)
+
+
+def test_summary_does_not_expose_raw_python_dictionaries():
+    summary = _gear_workshop_summary()
+
+    assert "{" not in summary
+    assert "}" not in summary
+    assert "'planks': 30" not in summary
 
 
 def test_quantity_greater_than_one_reads_sensibly():

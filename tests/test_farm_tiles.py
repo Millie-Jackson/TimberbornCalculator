@@ -52,8 +52,22 @@ def test_zero_yield_raises_value_error():
         calculate_daily_yield_per_tile(crop_data)
 
 
+def test_negative_yield_raises_value_error():
+    crop_data = {"yield_per_tile": -1, "growth_days": 4}
+
+    with pytest.raises(ValueError, match="yield_per_tile"):
+        calculate_daily_yield_per_tile(crop_data)
+
+
 def test_zero_growth_days_raises_value_error():
     crop_data = {"yield_per_tile": 3, "growth_days": 0}
+
+    with pytest.raises(ValueError, match="growth_days"):
+        calculate_daily_yield_per_tile(crop_data)
+
+
+def test_negative_growth_days_raises_value_error():
+    crop_data = {"yield_per_tile": 3, "growth_days": -1}
 
     with pytest.raises(ValueError, match="growth_days"):
         calculate_daily_yield_per_tile(crop_data)

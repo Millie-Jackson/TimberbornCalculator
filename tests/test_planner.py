@@ -14,7 +14,7 @@ def test_adding_one_gear_workshop_returns_extra_worker_count():
     assert result.extra_workers == 4
 
 
-def test_quantity_two_multiplies_workers_and_power():
+def test_quantity_two_multiplies_workers_inputs_build_costs_and_power():
     result = plan_building_addition(
         load_faction_data("folktails"),
         load_global_data(),
@@ -23,6 +23,9 @@ def test_quantity_two_multiplies_workers_and_power():
     )
 
     assert result.extra_workers == 8
+    assert result.upstream_resources["construction_cost"] == {"planks": 60}
+    assert result.upstream_resources["science_cost"] == {"science": 60}
+    assert result.upstream_resources["inputs_per_day"] == {"planks": 20}
     assert result.power_required == 240
     assert result.power_produced == 0
 
@@ -46,6 +49,17 @@ def test_operating_inputs_are_included():
     )
 
     assert result.upstream_resources["inputs_per_day"] == {"planks": 10}
+
+
+def test_construction_cost_and_operating_inputs_are_kept_separate():
+    result = plan_building_addition(
+        load_faction_data("folktails"),
+        load_global_data(),
+        "lumber_mill",
+    )
+
+    assert result.upstream_resources["construction_cost"] == {"logs": 20}
+    assert result.upstream_resources["inputs_per_day"] == {"logs": 10}
 
 
 def test_upstream_dependencies_are_returned_if_present():

@@ -105,6 +105,22 @@ def test_power_values_are_included():
     assert result.run.power_produced == 0
 
 
+def test_power_produced_defaults_to_zero_when_missing():
+    faction_data = {
+        "buildings": {
+            "plain_building": {
+                "name": "Plain Building",
+                "power_required": 5,
+            }
+        }
+    }
+
+    result = get_building_dependency_summary("plain_building", faction_data)
+
+    assert result.run.power_required == 5
+    assert result.run.power_produced == 0
+
+
 def test_inputs_and_outputs_are_included():
     faction_data = load_faction_data("folktails")
 
