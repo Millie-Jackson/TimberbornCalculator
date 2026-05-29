@@ -176,6 +176,18 @@ recommendation buckets, not confirmed exact Timberborn 1.0 wellbeing terms yet.
         "name": "Leisure",
         "description": "Recreation and free-time activities."
       }
+    },
+    "recommendation_rules": {
+      "campsite": {
+        "category": "leisure",
+        "building_id": "campsite",
+        "population_per_building": 10,
+        "message": "Add campsites for basic leisure coverage."
+      },
+      "food_variety": {
+        "category": "nutrition",
+        "message": "Plan for more than one food type as the colony grows."
+      }
     }
   }
 }

@@ -1,11 +1,15 @@
 import pytest
 
 from timberborn_planner.calculators.wellbeing import (
+    calculate_required_wellbeing_buildings,
+    generate_wellbeing_recommendations,
     get_wellbeing_categories,
     get_wellbeing_category,
     list_wellbeing_category_names,
+    WellbeingRecommendation,
 )
-from timberborn_planner.services.loaders import load_global_data
+from timberborn_planner.models.colony import ColonyInputs
+from timberborn_planner.services.loaders import load_faction_data, load_global_data
 
 
 EXPECTED_WELLBEING_CATEGORY_IDS = {
@@ -77,6 +81,128 @@ def test_malformed_wellbeing_data_raises_clear_value_error():
 def test_malformed_wellbeing_categories_raise_clear_value_error():
     with pytest.raises(ValueError, match="wellbeing categories must be a JSON object"):
         get_wellbeing_categories({"wellbeing": {"categories": []}})
+
+
+def test_zero_population_returns_no_building_recommendations():
+    recommendations = generate_wellbeing_recommendations(
+        ColonyInputs(),
+        load_global_data(),
+        load_faction_data("folktails"),
+    )
+
+    building_recommendations = [
+        recommendation
+        for recommendation in recommendations
+        if recommendation.building_id is not None
+    ]
+
+    assert building_recommendations == []
+
+
+def test_ten_biological_population_recommends_one_campsite():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        "campsite",
+    )
+
+    assert recommendation.required_quantity == 1
+
+
+def test_eleven_biological_population_recommends_two_campsites():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=11),
+        "campsite",
+    )
+
+    assert recommendation.required_quantity == 2
+
+
+def test_bots_do_not_increase_basic_wellbeing_count():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10, bots=20),
+        "campsite",
+    )
+
+    assert recommendation.required_quantity == 1
+
+
+def test_kits_increase_basic_wellbeing_count():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=9, kits=2),
+        "campsite",
+    )
+
+    assert recommendation.required_quantity == 2
+
+
+def test_invalid_population_per_building_raises_value_error():
+    with pytest.raises(ValueError, match="population_per_building must be above 0"):
+        calculate_required_wellbeing_buildings(
+            biological_population=10,
+            population_per_building=0,
+        )
+
+
+def test_wellbeing_recommendations_include_category():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        "campsite",
+    )
+
+    assert recommendation.category == "leisure"
+
+
+def test_wellbeing_recommendations_include_readable_message():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        "campsite",
+    )
+
+    assert recommendation.message == "Add campsites for basic leisure coverage."
+
+
+def test_missing_building_id_is_handled_safely():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        "rooftop_terrace",
+    )
+
+    assert recommendation.building_id == "rooftop_terrace"
+    assert recommendation.building_name == "Rooftop Terrace"
+    assert recommendation.required_quantity == 1
+
+
+def test_nutrition_recommendation_returns_general_reminder():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        None,
+        category="nutrition",
+    )
+
+    assert recommendation.required_quantity is None
+    assert recommendation.message == (
+        "Plan for more than one food type as the colony grows."
+    )
+
+
+def _recommendation_for(
+    colony: ColonyInputs,
+    building_id: str | None,
+    category: str | None = None,
+) -> WellbeingRecommendation:
+    recommendations = generate_wellbeing_recommendations(
+        colony,
+        load_global_data(),
+        load_faction_data("folktails"),
+    )
+
+    for recommendation in recommendations:
+        if recommendation.building_id == building_id and (
+            category is None or recommendation.category == category
+        ):
+            return recommendation
+
+    raise AssertionError("Expected wellbeing recommendation was not generated")
 
 
 # END OF FILE

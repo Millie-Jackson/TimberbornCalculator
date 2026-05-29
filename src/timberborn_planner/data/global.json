@@ -92,6 +92,34 @@
                 "description": "Risk reduction and survival support.",
                 "notes": "Internal planner grouping until Timberborn 1.0 wellbeing terms are verified."
             }
+        },
+        "recommendation_rules": {
+            "food_variety": {
+                "category": "nutrition",
+                "message": "Plan for more than one food type as the colony grows.",
+                "notes": "Placeholder planning reminder until food variety rules are modelled in detail."
+            },
+            "campsite": {
+                "category": "leisure",
+                "building_id": "campsite",
+                "population_per_building": 10,
+                "message": "Add campsites for basic leisure coverage.",
+                "notes": "Placeholder planning ratio until Timberborn 1.0 wellbeing values are verified."
+            },
+            "rooftop_terrace": {
+                "category": "leisure",
+                "building_id": "rooftop_terrace",
+                "population_per_building": 10,
+                "message": "Add rooftop terraces for extra leisure coverage.",
+                "notes": "Placeholder planning ratio until Timberborn 1.0 wellbeing values are verified."
+            },
+            "shrine": {
+                "category": "spirituality",
+                "building_id": "shrine",
+                "population_per_building": 20,
+                "message": "Add shrine or temple-style support when available.",
+                "notes": "Placeholder planning ratio until Timberborn 1.0 wellbeing values are verified."
+            }
         }
     }
 }
