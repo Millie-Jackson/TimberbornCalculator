@@ -49,5 +49,49 @@
             "food_per_day": 0,
             "water_per_day": 0
         }
+    },
+    "wellbeing": {
+        "categories": {
+            "nutrition": {
+                "name": "Nutrition",
+                "description": "Food variety and diet-related wellbeing.",
+                "notes": "Internal planner grouping until Timberborn 1.0 wellbeing terms are verified."
+            },
+            "comfort": {
+                "name": "Comfort",
+                "description": "Housing and daily comfort bonuses.",
+                "notes": "Internal planner grouping until Timberborn 1.0 wellbeing terms are verified."
+            },
+            "leisure": {
+                "name": "Leisure",
+                "description": "Recreation and free-time activities.",
+                "notes": "Internal planner grouping until Timberborn 1.0 wellbeing terms are verified."
+            },
+            "spirituality": {
+                "name": "Spirituality",
+                "description": "Temples, shrines, and related services.",
+                "notes": "Internal planner grouping until Timberborn 1.0 wellbeing terms are verified."
+            },
+            "aesthetics": {
+                "name": "Aesthetics",
+                "description": "Decoration and beauty-related bonuses.",
+                "notes": "Internal planner grouping until Timberborn 1.0 wellbeing terms are verified."
+            },
+            "social": {
+                "name": "Social",
+                "description": "Social spaces and gathering needs.",
+                "notes": "Internal planner grouping until Timberborn 1.0 wellbeing terms are verified."
+            },
+            "health": {
+                "name": "Health",
+                "description": "Medical or condition-related support.",
+                "notes": "Internal planner grouping until Timberborn 1.0 wellbeing terms are verified."
+            },
+            "safety": {
+                "name": "Safety",
+                "description": "Risk reduction and survival support.",
+                "notes": "Internal planner grouping until Timberborn 1.0 wellbeing terms are verified."
+            }
+        }
     }
 }

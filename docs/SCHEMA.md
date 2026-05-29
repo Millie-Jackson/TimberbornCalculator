@@ -157,11 +157,26 @@ Bots:
 
 Wellbeing is recommendation-based at MVP stage.
 
+Global wellbeing categories are internal planner groups. They are practical
+recommendation buckets, not confirmed exact Timberborn 1.0 wellbeing terms yet.
+
 ```json
 {
   "wellbeing": {
-    "category": "leisure",
-    "supports_population": 10
+    "categories": {
+      "nutrition": {
+        "name": "Nutrition",
+        "description": "Food variety and diet-related wellbeing."
+      },
+      "comfort": {
+        "name": "Comfort",
+        "description": "Housing and daily comfort bonuses."
+      },
+      "leisure": {
+        "name": "Leisure",
+        "description": "Recreation and free-time activities."
+      }
+    }
   }
 }
 ```
