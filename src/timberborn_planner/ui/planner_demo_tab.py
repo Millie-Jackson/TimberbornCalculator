@@ -5,15 +5,12 @@ from typing import Any
 
 import gradio as gr
 
-from timberborn_planner.models.building import ResourceAmounts
+from timberborn_planner.calculators.power import PowerSetupSuggestion
 from timberborn_planner.services.loaders import load_faction_data, load_global_data
 from timberborn_planner.services.planner import BuildingPlanResult, plan_building_addition
-from timberborn_planner.services.summary_text import (
-    format_building_plan_summary,
-    format_resource_amounts,
-)
+from timberborn_planner.services.summary_text import format_power_summary
 
-PlannerDemoSections = tuple[str, str, str, str, str]
+PlannerDemoSections = tuple[str, str, str]
 
 
 def build_planner_demo_tab() -> None:
@@ -40,18 +37,14 @@ def build_planner_demo_tab() -> None:
                 plan_button = gr.Button("Update planner")
 
             with gr.Column(scale=2):
-                summary_output = gr.Markdown(elem_classes=["output-markdown"])
-                resources_output = gr.Markdown(elem_classes=["output-markdown"])
-                support_output = gr.Markdown(elem_classes=["output-markdown"])
-                power_output = gr.Markdown(elem_classes=["output-markdown"])
+                power_summary_output = gr.Markdown(elem_classes=["output-markdown"])
+                suggested_setup_output = gr.Markdown(elem_classes=["output-markdown"])
                 notes_output = gr.Markdown(elem_classes=["output-markdown"])
 
         inputs = [building, quantity]
         outputs = [
-            summary_output,
-            resources_output,
-            support_output,
-            power_output,
+            power_summary_output,
+            suggested_setup_output,
             notes_output,
         ]
 
@@ -119,77 +112,53 @@ def build_planner_demo_sections(
     building_data = faction_data["buildings"][building_id]
 
     return (
-        _summary_section(plan_result),
-        _resources_section(plan_result),
-        _support_section(plan_result),
-        _power_section(plan_result),
+        _power_summary_section(plan_result),
+        _suggested_setup_section(plan_result),
         _notes_section(building_data),
     )
 
 
-def _summary_section(plan_result: BuildingPlanResult) -> str:
+def _power_summary_section(plan_result: BuildingPlanResult) -> str:
+    selected_building = _format_building_quantity(
+        plan_result.quantity,
+        plan_result.building_name,
+    )
     return _planner_card(
-        "Summary",
-        "Readable planner result.",
-        [("Plan", format_building_plan_summary(plan_result))],
+        "Power Summary",
+        "Phase 5 power totals for the selected building.",
+        [
+            ("Selected building", selected_building),
+            ("Total required power", _format_number(plan_result.power_required)),
+            ("Total produced power", _format_number(plan_result.power_produced)),
+            ("Power balance", _format_number(plan_result.power_balance)),
+            ("Status", plan_result.power_status),
+            ("Summary", format_power_summary(plan_result)),
+        ],
     )
 
 
-def _resources_section(plan_result: BuildingPlanResult) -> str:
-    upstream_buildings = "none"
-    if plan_result.upstream_buildings:
-        upstream_buildings = ", ".join(
-            _format_building_id(building_id)
-            for building_id in plan_result.upstream_buildings
+def _suggested_setup_section(plan_result: BuildingPlanResult) -> str:
+    setup = plan_result.suggested_power_setup
+    rows = [
+        ("Power gap", _format_number(setup.power_gap)),
+        ("Recommendation", setup.message),
+    ]
+
+    if setup.suggestions:
+        suggestion_text = ", ".join(
+            _format_power_suggestion(suggestion)
+            for suggestion in setup.suggestions
         )
+        rows.append(("Suggested buildings", suggestion_text))
 
-    rows = [
-        (
-            "Build resources",
-            format_resource_amounts(
-                plan_result.upstream_resources.get("construction_cost", {}),
-            ),
-        ),
-        (
-            "Science cost",
-            format_resource_amounts(
-                plan_result.upstream_resources.get("science_cost", {}),
-            ),
-        ),
-        (
-            "Run resources",
-            format_resource_amounts(
-                plan_result.upstream_resources.get("inputs_per_day", {}),
-                per_day=True,
-            ),
-        ),
-        ("Upstream buildings", upstream_buildings),
-    ]
-
-    return _planner_card("Resources", "Build and operating inputs.", rows)
+    return _planner_card("Suggested Setup", "Simple Folktails power coverage.", rows)
 
 
-def _support_section(plan_result: BuildingPlanResult) -> str:
-    rows = [
-        ("Extra workers", _format_number(plan_result.extra_workers)),
-        ("Food / day for workers", _format_number(plan_result.food_per_day_for_workers)),
-        ("Water / day for workers", _format_number(plan_result.water_per_day_for_workers)),
-    ]
-
-    return _planner_card("Worker Support", "Added colony support burden.", rows)
-
-
-def _power_section(plan_result: BuildingPlanResult) -> str:
-    rows = [
-        ("Total required power", _format_number(plan_result.power_required)),
-        ("Total produced power", _format_number(plan_result.power_produced)),
-        ("Power balance", _format_number(plan_result.power_balance)),
-        ("Power status", plan_result.power_status),
-        ("Power message", plan_result.power_message),
-        ("Suggested setup", plan_result.suggested_power_setup.message),
-    ]
-
-    return _planner_card("Power", "Required power, produced power, and balance.", rows)
+def _format_power_suggestion(suggestion: PowerSetupSuggestion) -> str:
+    return (
+        f"{_format_building_quantity(suggestion.quantity, suggestion.building_name)} "
+        f"({_format_number(suggestion.total_power_produced)} power)"
+    )
 
 
 def _notes_section(building_data: dict[str, Any]) -> str:
@@ -239,8 +208,18 @@ def _format_number(value: float | int) -> str:
     return str(value)
 
 
-def _format_building_id(building_id: str) -> str:
-    return building_id.replace("_", " ").title()
+def _format_building_quantity(quantity: int, building_name: str) -> str:
+    if quantity == 1:
+        return f"1 {building_name}"
+
+    return f"{quantity} {_pluralise_name(building_name)}"
+
+
+def _pluralise_name(name: str) -> str:
+    if name.endswith("s"):
+        return name
+
+    return f"{name}s"
 
 
 # END OF FILE
