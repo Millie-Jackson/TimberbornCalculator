@@ -7,6 +7,7 @@ from timberborn_planner.calculators.food_water import (
     calculate_food_per_day,
     calculate_water_per_day,
 )
+from timberborn_planner.calculators.power import calculate_building_power_demand
 from timberborn_planner.models.building import ResourceAmounts
 from timberborn_planner.models.colony import ColonyInputs
 from timberborn_planner.services.dependency_rules import (
@@ -71,7 +72,7 @@ def plan_building_addition(
 
     extra_workers = dependency_summary.run.workers * quantity
     worker_colony = ColonyInputs(adults=extra_workers)
-    power_required = dependency_summary.run.power_required * quantity
+    power_required = calculate_building_power_demand(building_data, quantity)
     power_produced = dependency_summary.run.power_produced * quantity
 
     return BuildingPlanResult(
