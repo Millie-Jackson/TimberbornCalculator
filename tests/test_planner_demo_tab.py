@@ -1,63 +1,54 @@
-from timberborn_planner.services.loaders import load_faction_data
-from timberborn_planner.ui.planner_demo_tab import (
-    build_building_choices,
-    build_planner_demo_sections,
-    default_building_id,
-)
+from timberborn_planner.ui.planner_demo_tab import build_planner_demo_sections
 
 
-def test_building_choices_use_names_as_labels_and_ids_as_values():
-    faction_data = load_faction_data("folktails")
-
-    choices = build_building_choices(faction_data)
-
-    assert ("Gear Workshop", "gear_workshop") in choices
-
-
-def test_default_building_is_gear_workshop_when_available():
-    faction_data = load_faction_data("folktails")
-
-    assert default_building_id(faction_data) == "gear_workshop"
-
-
-def test_planner_demo_sections_focus_on_phase_five_power_outputs():
-    sections = build_planner_demo_sections("gear_workshop", 1)
+def test_planner_demo_sections_focus_on_phase_six_wellbeing_outputs():
+    sections = build_planner_demo_sections(10, 0, 0)
     joined_sections = "\n".join(sections)
 
     assert len(sections) == 3
-    assert "Power Summary" in joined_sections
-    assert "Selected building" in joined_sections
-    assert "1 Gear Workshop" in joined_sections
-    assert "Total required power" in joined_sections
-    assert "Total produced power" in joined_sections
-    assert "Power balance" in joined_sections
-    assert "Status" in joined_sections
-    assert "Power deficit: 120" in joined_sections
-    assert "Suggested Setup" in joined_sections
-    assert "Add 3 Power Wheels to cover a 120 power gap." in joined_sections
-    assert "3 Power Wheels (150 power)" in joined_sections
+    assert "Wellbeing Categories" in joined_sections
+    assert "Service Recommendations" in joined_sections
     assert "Notes" in joined_sections
+    assert "Nutrition" in joined_sections
+    assert "Leisure" in joined_sections
+    assert "campsite" in joined_sections
+    assert "quantity 1" in joined_sections
+    assert "1 per 10 biological population" in joined_sections
+    assert "Add campsites for basic leisure coverage." in joined_sections
+    assert "Power Summary" not in joined_sections
+    assert "Total required power" not in joined_sections
+    assert "Power deficit" not in joined_sections
+    assert "Suggested Setup" not in joined_sections
     assert "Build resources" not in joined_sections
     assert "Run resources" not in joined_sections
     assert "Upstream buildings" not in joined_sections
-    assert "Extra workers" not in joined_sections
-    assert "Food / day for workers" not in joined_sections
-    assert "30 planks" not in joined_sections
-    assert "10 planks/day" not in joined_sections
-    assert "{'planks': 30}" not in joined_sections
-    assert "'building_id': 'power_wheel'" not in joined_sections
 
 
-def test_planner_demo_sections_show_power_generation_surplus():
-    sections = build_planner_demo_sections("power_wheel", 2)
+def test_planner_demo_kits_increase_service_recommendations():
+    sections = build_planner_demo_sections(10, 1, 0)
     joined_sections = "\n".join(sections)
 
-    assert "2 Power Wheels" in joined_sections
-    assert "<span>Total required power</span><strong>0</strong>" in joined_sections
-    assert "<span>Total produced power</span><strong>100</strong>" in joined_sections
-    assert "<span>Power balance</span><strong>100</strong>" in joined_sections
-    assert "Power surplus: 100" in joined_sections
-    assert "No extra power setup needed." in joined_sections
+    assert "Biological population</span><strong>11</strong>" in joined_sections
+    assert "<span>campsite</span><strong>leisure, quantity 2" in joined_sections
+    assert "<span>rooftop_terrace</span><strong>comfort, quantity 2" in joined_sections
+
+
+def test_planner_demo_bots_do_not_increase_service_recommendations():
+    sections = build_planner_demo_sections(10, 0, 10)
+    joined_sections = "\n".join(sections)
+
+    assert "Biological population</span><strong>10</strong>" in joined_sections
+    assert "Bots counted for service ratios</span><strong>no</strong>" in joined_sections
+    assert "<span>campsite</span><strong>leisure, quantity 1" in joined_sections
+    assert "<span>rooftop_terrace</span><strong>comfort, quantity 1" in joined_sections
+
+
+def test_planner_demo_zero_biological_population_has_no_service_recommendations():
+    sections = build_planner_demo_sections(0, 0, 10)
+    joined_sections = "\n".join(sections)
+
+    assert "none needed for 0 biological population" in joined_sections
+    assert "Biological population</span><strong>0</strong>" in joined_sections
 
 
 # END OF FILE
