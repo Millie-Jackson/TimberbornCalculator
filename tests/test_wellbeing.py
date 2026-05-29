@@ -6,6 +6,7 @@ from timberborn_planner.calculators.wellbeing import (
     get_service_rules,
     get_wellbeing_categories,
     get_wellbeing_category,
+    get_wellbeing_recommendation_rules,
     list_wellbeing_category_names,
 )
 from timberborn_planner.services.loaders import load_global_data
@@ -68,6 +69,10 @@ def test_missing_wellbeing_data_returns_empty_categories():
     assert get_wellbeing_categories({}) == {}
 
 
+def test_empty_wellbeing_data_returns_empty_categories():
+    assert get_wellbeing_categories({"wellbeing": {}}) == {}
+
+
 def test_missing_wellbeing_data_returns_empty_category_names():
     assert list_wellbeing_category_names({}) == []
 
@@ -88,11 +93,26 @@ def test_service_rules_can_be_loaded():
     assert {"campsite", "rooftop_terrace", "shrine"} <= service_rules.keys()
 
 
+def test_missing_wellbeing_data_returns_empty_service_rules():
+    assert get_service_rules({}) == {}
+
+
+def test_empty_wellbeing_data_returns_empty_recommendation_rules():
+    assert get_wellbeing_recommendation_rules({"wellbeing": {}}) == {}
+
+
 def test_ten_population_requires_one_service_building():
     assert calculate_service_building_count(
         population=10,
         population_per_building=10,
     ) == 1
+
+
+def test_required_building_count_rounds_up():
+    assert calculate_required_wellbeing_buildings(
+        biological_population=21,
+        population_per_building=10,
+    ) == 3
 
 
 def test_eleven_population_requires_two_service_buildings():
@@ -122,6 +142,14 @@ def test_invalid_service_ratio_raises_value_error():
         calculate_service_building_count(
             population=10,
             population_per_building=0,
+        )
+
+
+def test_negative_population_raises_value_error():
+    with pytest.raises(ValueError, match="biological_population must be 0 or above"):
+        calculate_required_wellbeing_buildings(
+            biological_population=-1,
+            population_per_building=10,
         )
 
 

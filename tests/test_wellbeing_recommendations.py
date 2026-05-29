@@ -53,6 +53,15 @@ def test_bots_do_not_increase_service_recommendations():
     assert recommendation.required_quantity == 1
 
 
+def test_biological_population_uses_adults_and_kits_for_service_ratios():
+    recommendation = _recommendation_for(
+        ColonyInputs(kits=10),
+        "campsite",
+    )
+
+    assert recommendation.required_quantity == 1
+
+
 def test_kits_increase_service_recommendations():
     recommendation = _recommendation_for(
         ColonyInputs(adults=9, kits=2),
@@ -69,6 +78,33 @@ def test_service_recommendations_include_category():
     )
 
     assert recommendation.category == "leisure"
+
+
+def test_service_recommendations_include_building_id():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        "campsite",
+    )
+
+    assert recommendation.building_id == "campsite"
+
+
+def test_service_recommendations_include_building_name():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        "campsite",
+    )
+
+    assert recommendation.building_name == "campsite"
+
+
+def test_service_recommendations_include_required_quantity():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        "campsite",
+    )
+
+    assert recommendation.required_quantity == 1
 
 
 def test_service_recommendations_include_readable_message():
@@ -124,6 +160,39 @@ def test_generate_wellbeing_recommendations_includes_service_recommendations():
         recommendation.building_id == "campsite"
         for recommendation in recommendations
     )
+
+
+def test_recommendation_to_dict_includes_expected_fields():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        "campsite",
+    )
+
+    assert recommendation.to_dict() == {
+        "category": "leisure",
+        "building_id": "campsite",
+        "building_name": "campsite",
+        "required_quantity": 1,
+        "ratio_text": "1 per 10 biological population",
+        "message": "Add campsites for basic leisure coverage.",
+        "notes": (
+            "Planning ratio, not exact optimisation. "
+            "Placeholder until Timberborn 1.0 wellbeing values are verified."
+        ),
+    }
+
+
+def test_recommendation_messages_do_not_expose_raw_python_dictionaries():
+    recommendations = generate_wellbeing_recommendations(
+        ColonyInputs(adults=10),
+        load_global_data(),
+        load_faction_data("folktails"),
+    )
+
+    for recommendation in recommendations:
+        assert "{" not in recommendation.message
+        assert "}" not in recommendation.message
+        assert "'building_id'" not in recommendation.message
 
 
 def _recommendation_for(
