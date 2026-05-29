@@ -11,6 +11,7 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from timberborn_planner.ui.overview_tab import build_overview_tab
+from timberborn_planner.ui.planner_demo_tab import build_planner_demo_tab
 from timberborn_planner.ui.theme import TIMBERBORN_CSS
 
 
@@ -26,6 +27,7 @@ def build_app() -> gr.Blocks:
         )
 
         build_overview_tab()
+        build_planner_demo_tab()
 
     return app
 
