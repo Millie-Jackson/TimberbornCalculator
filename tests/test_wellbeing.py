@@ -2,10 +2,13 @@ import pytest
 
 from timberborn_planner.calculators.wellbeing import (
     calculate_required_wellbeing_buildings,
+    calculate_service_building_count,
     generate_wellbeing_recommendations,
+    get_service_rules,
     get_wellbeing_categories,
     get_wellbeing_category,
     list_wellbeing_category_names,
+    suggest_service_buildings,
     WellbeingRecommendation,
 )
 from timberborn_planner.models.colony import ColonyInputs
@@ -84,19 +87,19 @@ def test_malformed_wellbeing_categories_raise_clear_value_error():
 
 
 def test_zero_population_returns_no_building_recommendations():
-    recommendations = generate_wellbeing_recommendations(
+    recommendations = suggest_service_buildings(
         ColonyInputs(),
         load_global_data(),
         load_faction_data("folktails"),
     )
 
-    building_recommendations = [
-        recommendation
-        for recommendation in recommendations
-        if recommendation.building_id is not None
-    ]
+    assert recommendations == []
 
-    assert building_recommendations == []
+
+def test_service_rules_can_be_loaded():
+    service_rules = get_service_rules(load_global_data())
+
+    assert {"campsite", "rooftop_terrace", "shrine"} <= service_rules.keys()
 
 
 def test_ten_biological_population_recommends_one_campsite():
@@ -115,6 +118,15 @@ def test_eleven_biological_population_recommends_two_campsites():
     )
 
     assert recommendation.required_quantity == 2
+
+
+def test_twenty_biological_population_recommends_one_shrine():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=20),
+        "shrine",
+    )
+
+    assert recommendation.required_quantity == 1
 
 
 def test_bots_do_not_increase_basic_wellbeing_count():
@@ -139,6 +151,14 @@ def test_invalid_population_per_building_raises_value_error():
     with pytest.raises(ValueError, match="population_per_building must be above 0"):
         calculate_required_wellbeing_buildings(
             biological_population=10,
+            population_per_building=0,
+        )
+
+
+def test_invalid_service_ratio_raises_value_error():
+    with pytest.raises(ValueError, match="population_per_building must be above 0"):
+        calculate_service_building_count(
+            population=10,
             population_per_building=0,
         )
 
@@ -168,8 +188,17 @@ def test_missing_building_id_is_handled_safely():
     )
 
     assert recommendation.building_id == "rooftop_terrace"
-    assert recommendation.building_name == "Rooftop Terrace"
+    assert recommendation.building_name == "rooftop_terrace"
     assert recommendation.required_quantity == 1
+
+
+def test_service_recommendation_ratio_text_is_readable():
+    recommendation = _recommendation_for(
+        ColonyInputs(adults=10),
+        "campsite",
+    )
+
+    assert recommendation.ratio_text == "1 per 10 biological population"
 
 
 def test_nutrition_recommendation_returns_general_reminder():
@@ -185,16 +214,36 @@ def test_nutrition_recommendation_returns_general_reminder():
     )
 
 
+def test_generate_wellbeing_recommendations_includes_service_recommendations():
+    recommendations = generate_wellbeing_recommendations(
+        ColonyInputs(adults=10),
+        load_global_data(),
+        load_faction_data("folktails"),
+    )
+
+    assert any(
+        recommendation.building_id == "campsite"
+        for recommendation in recommendations
+    )
+
+
 def _recommendation_for(
     colony: ColonyInputs,
     building_id: str | None,
     category: str | None = None,
 ) -> WellbeingRecommendation:
-    recommendations = generate_wellbeing_recommendations(
+    recommendations = suggest_service_buildings(
         colony,
         load_global_data(),
         load_faction_data("folktails"),
     )
+
+    if building_id is None:
+        recommendations = generate_wellbeing_recommendations(
+            colony,
+            load_global_data(),
+            load_faction_data("folktails"),
+        )
 
     for recommendation in recommendations:
         if recommendation.building_id == building_id and (

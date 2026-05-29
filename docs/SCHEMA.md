@@ -178,15 +178,27 @@ recommendation buckets, not confirmed exact Timberborn 1.0 wellbeing terms yet.
       }
     },
     "recommendation_rules": {
+      "food_variety": {
+        "category": "nutrition",
+        "message": "Plan for more than one food type as the colony grows."
+      }
+    },
+    "service_rules": {
       "campsite": {
         "category": "leisure",
         "building_id": "campsite",
         "population_per_building": 10,
-        "message": "Add campsites for basic leisure coverage."
+        "applies_to": "biological_population",
+        "message": "Add campsites for basic leisure coverage.",
+        "notes": ["Planning ratio, not exact optimisation."]
       },
-      "food_variety": {
-        "category": "nutrition",
-        "message": "Plan for more than one food type as the colony grows."
+      "shrine": {
+        "category": "spirituality",
+        "building_id": "shrine",
+        "population_per_building": 20,
+        "applies_to": "biological_population",
+        "message": "Add shrine or temple-style support when available.",
+        "notes": ["Planning ratio, not exact optimisation."]
       }
     }
   }
