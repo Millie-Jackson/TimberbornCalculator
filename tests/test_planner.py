@@ -152,6 +152,35 @@ def test_planner_reports_deficit_status_for_power_consumers():
     )
 
 
+def test_planner_result_to_dict_includes_power_summary_fields():
+    result = plan_building_addition(
+        load_faction_data("folktails"),
+        load_global_data(),
+        "gear_workshop",
+    )
+
+    result_dict = result.to_dict()
+
+    assert result_dict["power_required"] == 120
+    assert result_dict["power_produced"] == 0
+    assert result_dict["power_balance"] == -120
+    assert result_dict["power_status"] == "deficit"
+    assert result_dict["power_message"] == "Power deficit: 120"
+    assert result_dict["suggested_power_setup"] == {
+        "power_gap": 120,
+        "suggestions": [
+            {
+                "building_id": "power_wheel",
+                "building_name": "Power Wheel",
+                "quantity": 3,
+                "power_per_building": 50,
+                "total_power_produced": 150,
+            }
+        ],
+        "message": "Add 3 Power Wheels to cover a 120 power gap.",
+    }
+
+
 def test_invalid_building_id_raises_clear_value_error():
     with pytest.raises(ValueError, match="Unknown building id: missing_building"):
         plan_building_addition(

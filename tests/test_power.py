@@ -108,6 +108,20 @@ def test_power_balance_is_generation_minus_demand():
     assert calculate_power_balance(building_quantities, faction_data) == -20
 
 
+def test_power_balance_rejects_negative_quantity():
+    faction_data = load_faction_data("folktails")
+
+    with pytest.raises(ValueError, match="quantity must be 0 or above"):
+        calculate_power_balance({"power_wheel": -1}, faction_data)
+
+
+def test_power_balance_rejects_invalid_building_id():
+    faction_data = load_faction_data("folktails")
+
+    with pytest.raises(ValueError, match="Unknown building id: missing_building"):
+        calculate_power_balance({"missing_building": 1}, faction_data)
+
+
 def test_power_summary_reports_deficit_when_required_exceeds_produced():
     faction_data = load_faction_data("folktails")
 
@@ -188,6 +202,20 @@ def test_power_setup_suggests_enough_power_wheels_for_deficit():
     assert setup.suggestions[0].quantity == 3
     assert setup.suggestions[0].power_per_building == 50
     assert setup.suggestions[0].total_power_produced == 150
+
+
+def test_power_setup_prefers_power_wheel_when_multiple_generators_exist():
+    faction_data = {
+        "buildings": {
+            "windmill": {"name": "Windmill", "power_produced": 100},
+            "power_wheel": {"name": "Power Wheel", "power_produced": 50},
+        }
+    }
+
+    setup = suggest_power_setup(75, faction_data)
+
+    assert setup.suggestions[0].building_id == "power_wheel"
+    assert setup.suggestions[0].quantity == 2
 
 
 def test_power_setup_rounds_up_to_whole_buildings():

@@ -30,7 +30,7 @@ class PowerSetupSuggestion:
 class PowerSetupPlan:
     """Suggested setup for covering a power gap."""
 
-    power_gap: float | int
+    power_gap: float | int = 0
     suggestions: list[PowerSetupSuggestion] = field(default_factory=list)
     message: str = "No extra power setup needed."
 

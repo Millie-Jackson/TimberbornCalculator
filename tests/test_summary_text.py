@@ -1,5 +1,5 @@
 from timberborn_planner.services.loaders import load_faction_data, load_global_data
-from timberborn_planner.services.planner import plan_building_addition
+from timberborn_planner.services.planner import BuildingPlanResult, plan_building_addition
 from timberborn_planner.services.summary_text import (
     format_building_plan_summary,
     format_power_summary,
@@ -88,6 +88,24 @@ def test_power_surplus_is_included_when_power_balance_is_positive():
     )
 
     assert "Power surplus: 50" in format_power_summary(plan_result)
+
+
+def test_power_balanced_wording_is_included_when_power_balance_is_zero():
+    plan_result = BuildingPlanResult(
+        building_id="balanced_setup",
+        building_name="Balanced Setup",
+        power_required=50,
+        power_produced=50,
+        power_balance=0,
+        power_status="balanced",
+        power_message="Power is balanced.",
+    )
+
+    summary = format_power_summary(plan_result)
+
+    assert "Power required: 50." in summary
+    assert "Power produced: 50." in summary
+    assert "Power is balanced." in summary
 
 
 def test_summary_does_not_expose_raw_python_dictionaries():
