@@ -7,6 +7,7 @@ from timberborn_planner.calculators.power import (
     calculate_power_summary,
     calculate_total_power_demand,
     calculate_total_power_generation,
+    suggest_power_setup,
 )
 from timberborn_planner.services.loaders import load_faction_data
 
@@ -117,6 +118,9 @@ def test_power_summary_reports_deficit_when_required_exceeds_produced():
     assert summary.power_balance == -120
     assert summary.status == "deficit"
     assert summary.message == "Power deficit: 120"
+    assert summary.suggested_setup.message == (
+        "Add 3 Power Wheels to cover a 120 power gap."
+    )
 
 
 def test_power_summary_reports_surplus_when_produced_exceeds_required():
@@ -129,6 +133,7 @@ def test_power_summary_reports_surplus_when_produced_exceeds_required():
     assert summary.power_balance == 100
     assert summary.status == "surplus"
     assert summary.message == "Power surplus: 100"
+    assert summary.suggested_setup.message == "No extra power setup needed."
 
 
 def test_power_summary_reports_balanced_when_required_matches_produced():
@@ -147,6 +152,83 @@ def test_power_summary_reports_balanced_when_required_matches_produced():
     assert summary.power_balance == 0
     assert summary.status == "balanced"
     assert summary.message == "Power is balanced."
+    assert summary.suggested_setup.message == "No extra power setup needed."
+
+
+def test_power_setup_has_no_suggestion_when_power_gap_is_zero():
+    faction_data = load_faction_data("folktails")
+
+    setup = suggest_power_setup(0, faction_data)
+
+    assert setup.power_gap == 0
+    assert setup.suggestions == []
+    assert setup.message == "No extra power setup needed."
+
+
+def test_power_setup_has_no_suggestion_when_power_gap_is_negative():
+    faction_data = load_faction_data("folktails")
+
+    setup = suggest_power_setup(-10, faction_data)
+
+    assert setup.power_gap == 0
+    assert setup.suggestions == []
+    assert setup.message == "No extra power setup needed."
+
+
+def test_power_setup_suggests_enough_power_wheels_for_deficit():
+    faction_data = load_faction_data("folktails")
+
+    setup = suggest_power_setup(120, faction_data)
+
+    assert setup.power_gap == 120
+    assert setup.message == "Add 3 Power Wheels to cover a 120 power gap."
+    assert len(setup.suggestions) == 1
+    assert setup.suggestions[0].building_id == "power_wheel"
+    assert setup.suggestions[0].building_name == "Power Wheel"
+    assert setup.suggestions[0].quantity == 3
+    assert setup.suggestions[0].power_per_building == 50
+    assert setup.suggestions[0].total_power_produced == 150
+
+
+def test_power_setup_rounds_up_to_whole_buildings():
+    faction_data = load_faction_data("folktails")
+
+    setup = suggest_power_setup(51, faction_data)
+
+    assert setup.suggestions[0].quantity == 2
+    assert setup.suggestions[0].total_power_produced == 100
+
+
+def test_power_setup_ignores_buildings_with_no_power_production():
+    faction_data = {
+        "buildings": {
+            "plain_building": {"name": "Plain Building"},
+            "drain": {"name": "Drain", "power_required": 10},
+            "tiny_wheel": {"name": "Tiny Wheel", "power_produced": 25},
+        }
+    }
+
+    setup = suggest_power_setup(50, faction_data)
+
+    assert setup.suggestions[0].building_id == "tiny_wheel"
+    assert setup.suggestions[0].quantity == 2
+
+
+def test_power_setup_handles_no_available_power_producers():
+    faction_data = {
+        "buildings": {
+            "gear_workshop": {"name": "Gear Workshop", "power_required": 120},
+            "storage": {"name": "Storage"},
+        }
+    }
+
+    setup = suggest_power_setup(120, faction_data)
+
+    assert setup.power_gap == 120
+    assert setup.suggestions == []
+    assert setup.message == (
+        "No power-producing buildings are available to cover a 120 power gap."
+    )
 
 
 def test_quantity_zero_returns_zero_generation():

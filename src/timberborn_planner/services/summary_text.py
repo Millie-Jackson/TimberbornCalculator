@@ -34,7 +34,8 @@ def format_power_summary(plan_result: BuildingPlanResult) -> str:
     return (
         f"Power required: {_format_number(plan_result.power_required)}. "
         f"Power produced: {_format_number(plan_result.power_produced)}. "
-        f"{plan_result.power_message}"
+        f"{plan_result.power_message}. "
+        f"{plan_result.suggested_power_setup.message}"
     )
 
 

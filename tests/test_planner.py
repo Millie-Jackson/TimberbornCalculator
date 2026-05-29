@@ -147,6 +147,9 @@ def test_planner_reports_deficit_status_for_power_consumers():
     assert result.power_balance == -120
     assert result.power_status == "deficit"
     assert result.power_message == "Power deficit: 120"
+    assert result.suggested_power_setup.message == (
+        "Add 3 Power Wheels to cover a 120 power gap."
+    )
 
 
 def test_invalid_building_id_raises_clear_value_error():

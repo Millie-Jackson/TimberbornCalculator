@@ -32,7 +32,9 @@ def test_planner_demo_sections_include_summary_and_readable_outputs():
     assert "Total required power" in joined_sections
     assert "Total produced power" in joined_sections
     assert "Power deficit: 120" in joined_sections
+    assert "Add 3 Power Wheels to cover a 120 power gap." in joined_sections
     assert "{'planks': 30}" not in joined_sections
+    assert "'building_id': 'power_wheel'" not in joined_sections
 
 
 # END OF FILE

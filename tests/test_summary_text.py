@@ -74,6 +74,12 @@ def test_power_deficit_is_included_when_power_balance_is_negative():
     assert "Power deficit: 120" in format_power_summary(plan_result)
 
 
+def test_summary_text_includes_suggested_power_setup():
+    summary = _gear_workshop_summary()
+
+    assert "Add 3 Power Wheels to cover a 120 power gap." in summary
+
+
 def test_power_surplus_is_included_when_power_balance_is_positive():
     plan_result = plan_building_addition(
         load_faction_data("folktails"),
@@ -90,6 +96,7 @@ def test_summary_does_not_expose_raw_python_dictionaries():
     assert "{" not in summary
     assert "}" not in summary
     assert "'planks': 30" not in summary
+    assert "'building_id': 'power_wheel'" not in summary
 
 
 def test_quantity_greater_than_one_reads_sensibly():

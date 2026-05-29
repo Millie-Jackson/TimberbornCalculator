@@ -11,6 +11,7 @@ from timberborn_planner.calculators.power import (
     calculate_building_power_demand,
     calculate_building_power_generation,
     calculate_power_summary,
+    PowerSetupPlan,
 )
 from timberborn_planner.models.building import ResourceAmounts
 from timberborn_planner.models.colony import ColonyInputs
@@ -36,6 +37,7 @@ class BuildingPlanResult:
     power_balance: float | int = 0
     power_status: str = "balanced"
     power_message: str = "Power is balanced."
+    suggested_power_setup: PowerSetupPlan = field(default_factory=PowerSetupPlan)
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -54,6 +56,7 @@ class BuildingPlanResult:
             "power_balance": self.power_balance,
             "power_status": self.power_status,
             "power_message": self.power_message,
+            "suggested_power_setup": self.suggested_power_setup.to_dict(),
         }
 
 
@@ -114,6 +117,7 @@ def plan_building_addition(
         power_balance=power_produced - power_required,
         power_status=power_summary.status,
         power_message=power_summary.message,
+        suggested_power_setup=power_summary.suggested_setup,
     )
 
 

@@ -186,6 +186,7 @@ def _power_section(plan_result: BuildingPlanResult) -> str:
         ("Power balance", _format_number(plan_result.power_balance)),
         ("Power status", plan_result.power_status),
         ("Power message", plan_result.power_message),
+        ("Suggested setup", plan_result.suggested_power_setup.message),
     ]
 
     return _planner_card("Power", "Required power, produced power, and balance.", rows)
