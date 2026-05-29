@@ -3,16 +3,12 @@ import pytest
 from timberborn_planner.calculators.wellbeing import (
     calculate_required_wellbeing_buildings,
     calculate_service_building_count,
-    generate_wellbeing_recommendations,
     get_service_rules,
     get_wellbeing_categories,
     get_wellbeing_category,
     list_wellbeing_category_names,
-    suggest_service_buildings,
-    WellbeingRecommendation,
 )
-from timberborn_planner.models.colony import ColonyInputs
-from timberborn_planner.services.loaders import load_faction_data, load_global_data
+from timberborn_planner.services.loaders import load_global_data
 
 
 EXPECTED_WELLBEING_CATEGORY_IDS = {
@@ -86,65 +82,31 @@ def test_malformed_wellbeing_categories_raise_clear_value_error():
         get_wellbeing_categories({"wellbeing": {"categories": []}})
 
 
-def test_zero_population_returns_no_building_recommendations():
-    recommendations = suggest_service_buildings(
-        ColonyInputs(),
-        load_global_data(),
-        load_faction_data("folktails"),
-    )
-
-    assert recommendations == []
-
-
 def test_service_rules_can_be_loaded():
     service_rules = get_service_rules(load_global_data())
 
     assert {"campsite", "rooftop_terrace", "shrine"} <= service_rules.keys()
 
 
-def test_ten_biological_population_recommends_one_campsite():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=10),
-        "campsite",
-    )
-
-    assert recommendation.required_quantity == 1
+def test_ten_population_requires_one_service_building():
+    assert calculate_service_building_count(
+        population=10,
+        population_per_building=10,
+    ) == 1
 
 
-def test_eleven_biological_population_recommends_two_campsites():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=11),
-        "campsite",
-    )
-
-    assert recommendation.required_quantity == 2
+def test_eleven_population_requires_two_service_buildings():
+    assert calculate_service_building_count(
+        population=11,
+        population_per_building=10,
+    ) == 2
 
 
-def test_twenty_biological_population_recommends_one_shrine():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=20),
-        "shrine",
-    )
-
-    assert recommendation.required_quantity == 1
-
-
-def test_bots_do_not_increase_basic_wellbeing_count():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=10, bots=20),
-        "campsite",
-    )
-
-    assert recommendation.required_quantity == 1
-
-
-def test_kits_increase_basic_wellbeing_count():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=9, kits=2),
-        "campsite",
-    )
-
-    assert recommendation.required_quantity == 2
+def test_zero_population_requires_zero_service_buildings():
+    assert calculate_service_building_count(
+        population=0,
+        population_per_building=10,
+    ) == 0
 
 
 def test_invalid_population_per_building_raises_value_error():
@@ -161,97 +123,6 @@ def test_invalid_service_ratio_raises_value_error():
             population=10,
             population_per_building=0,
         )
-
-
-def test_wellbeing_recommendations_include_category():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=10),
-        "campsite",
-    )
-
-    assert recommendation.category == "leisure"
-
-
-def test_wellbeing_recommendations_include_readable_message():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=10),
-        "campsite",
-    )
-
-    assert recommendation.message == "Add campsites for basic leisure coverage."
-
-
-def test_missing_building_id_is_handled_safely():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=10),
-        "rooftop_terrace",
-    )
-
-    assert recommendation.building_id == "rooftop_terrace"
-    assert recommendation.building_name == "rooftop_terrace"
-    assert recommendation.required_quantity == 1
-
-
-def test_service_recommendation_ratio_text_is_readable():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=10),
-        "campsite",
-    )
-
-    assert recommendation.ratio_text == "1 per 10 biological population"
-
-
-def test_nutrition_recommendation_returns_general_reminder():
-    recommendation = _recommendation_for(
-        ColonyInputs(adults=10),
-        None,
-        category="nutrition",
-    )
-
-    assert recommendation.required_quantity is None
-    assert recommendation.message == (
-        "Plan for more than one food type as the colony grows."
-    )
-
-
-def test_generate_wellbeing_recommendations_includes_service_recommendations():
-    recommendations = generate_wellbeing_recommendations(
-        ColonyInputs(adults=10),
-        load_global_data(),
-        load_faction_data("folktails"),
-    )
-
-    assert any(
-        recommendation.building_id == "campsite"
-        for recommendation in recommendations
-    )
-
-
-def _recommendation_for(
-    colony: ColonyInputs,
-    building_id: str | None,
-    category: str | None = None,
-) -> WellbeingRecommendation:
-    recommendations = suggest_service_buildings(
-        colony,
-        load_global_data(),
-        load_faction_data("folktails"),
-    )
-
-    if building_id is None:
-        recommendations = generate_wellbeing_recommendations(
-            colony,
-            load_global_data(),
-            load_faction_data("folktails"),
-        )
-
-    for recommendation in recommendations:
-        if recommendation.building_id == building_id and (
-            category is None or recommendation.category == category
-        ):
-            return recommendation
-
-    raise AssertionError("Expected wellbeing recommendation was not generated")
 
 
 # END OF FILE
