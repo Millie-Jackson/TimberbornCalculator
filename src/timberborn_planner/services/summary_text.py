@@ -31,23 +31,11 @@ def format_worker_support_summary(plan_result: BuildingPlanResult) -> str:
 
 
 def format_power_summary(plan_result: BuildingPlanResult) -> str:
-    parts: list[str] = []
-
-    if plan_result.power_required:
-        parts.append(f"Power required: {_format_number(plan_result.power_required)}.")
-
-    if plan_result.power_produced:
-        parts.append(f"Power produced: {_format_number(plan_result.power_produced)}.")
-
-    if plan_result.power_balance < 0:
-        parts.append(f"Power gap: {_format_number(abs(plan_result.power_balance))}.")
-    elif plan_result.power_balance > 0:
-        parts.append(f"Power surplus: {_format_number(plan_result.power_balance)}.")
-
-    if not parts:
-        return "Power: none."
-
-    return " ".join(parts)
+    return (
+        f"Power required: {_format_number(plan_result.power_required)}. "
+        f"Power produced: {_format_number(plan_result.power_produced)}. "
+        f"{plan_result.power_message}"
+    )
 
 
 def format_building_plan_summary(plan_result: BuildingPlanResult) -> str:

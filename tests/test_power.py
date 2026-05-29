@@ -4,6 +4,7 @@ from timberborn_planner.calculators.power import (
     calculate_building_power_demand,
     calculate_building_power_generation,
     calculate_power_balance,
+    calculate_power_summary,
     calculate_total_power_demand,
     calculate_total_power_generation,
 )
@@ -104,6 +105,48 @@ def test_power_balance_is_generation_minus_demand():
     }
 
     assert calculate_power_balance(building_quantities, faction_data) == -20
+
+
+def test_power_summary_reports_deficit_when_required_exceeds_produced():
+    faction_data = load_faction_data("folktails")
+
+    summary = calculate_power_summary({"gear_workshop": 1}, faction_data)
+
+    assert summary.total_required_power == 120
+    assert summary.total_produced_power == 0
+    assert summary.power_balance == -120
+    assert summary.status == "deficit"
+    assert summary.message == "Power deficit: 120"
+
+
+def test_power_summary_reports_surplus_when_produced_exceeds_required():
+    faction_data = load_faction_data("folktails")
+
+    summary = calculate_power_summary({"power_wheel": 2}, faction_data)
+
+    assert summary.total_required_power == 0
+    assert summary.total_produced_power == 100
+    assert summary.power_balance == 100
+    assert summary.status == "surplus"
+    assert summary.message == "Power surplus: 100"
+
+
+def test_power_summary_reports_balanced_when_required_matches_produced():
+    faction_data = load_faction_data("folktails")
+
+    summary = calculate_power_summary(
+        {
+            "power_wheel": 1,
+            "lumber_mill": 1,
+        },
+        faction_data,
+    )
+
+    assert summary.total_required_power == 50
+    assert summary.total_produced_power == 50
+    assert summary.power_balance == 0
+    assert summary.status == "balanced"
+    assert summary.message == "Power is balanced."
 
 
 def test_quantity_zero_returns_zero_generation():

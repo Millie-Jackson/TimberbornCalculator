@@ -1,6 +1,18 @@
 """Power demand calculators."""
 
+from dataclasses import dataclass
 from typing import Any
+
+
+@dataclass(frozen=True)
+class PowerSummary:
+    """Power totals and status for selected buildings."""
+
+    total_required_power: float | int
+    total_produced_power: float | int
+    power_balance: float | int
+    status: str
+    message: str
 
 
 def calculate_building_power_demand(
@@ -82,6 +94,59 @@ def calculate_power_balance(
         building_quantities,
         faction_data,
     )
+
+
+def calculate_power_summary(
+    building_quantities: dict[str, int],
+    faction_data: dict[str, Any],
+) -> PowerSummary:
+    """Calculate power totals with a player-readable status message."""
+
+    total_required_power = calculate_total_power_demand(
+        building_quantities,
+        faction_data,
+    )
+    total_produced_power = calculate_total_power_generation(
+        building_quantities,
+        faction_data,
+    )
+    power_balance = total_produced_power - total_required_power
+    status = _power_status(power_balance)
+
+    return PowerSummary(
+        total_required_power=total_required_power,
+        total_produced_power=total_produced_power,
+        power_balance=power_balance,
+        status=status,
+        message=_power_message(status, power_balance),
+    )
+
+
+def _power_status(power_balance: float | int) -> str:
+    if power_balance < 0:
+        return "deficit"
+
+    if power_balance > 0:
+        return "surplus"
+
+    return "balanced"
+
+
+def _power_message(status: str, power_balance: float | int) -> str:
+    if status == "deficit":
+        return f"Power deficit: {_format_number(abs(power_balance))}"
+
+    if status == "surplus":
+        return f"Power surplus: {_format_number(power_balance)}"
+
+    return "Power is balanced."
+
+
+def _format_number(value: float | int) -> str:
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+
+    return str(value)
 
 
 # END OF FILE

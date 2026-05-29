@@ -181,12 +181,14 @@ def _support_section(plan_result: BuildingPlanResult) -> str:
 
 def _power_section(plan_result: BuildingPlanResult) -> str:
     rows = [
-        ("Power required", _format_number(plan_result.power_required)),
-        ("Power produced", _format_number(plan_result.power_produced)),
+        ("Total required power", _format_number(plan_result.power_required)),
+        ("Total produced power", _format_number(plan_result.power_produced)),
         ("Power balance", _format_number(plan_result.power_balance)),
+        ("Power status", plan_result.power_status),
+        ("Power message", plan_result.power_message),
     ]
 
-    return _planner_card("Power", "Direct power effect.", rows)
+    return _planner_card("Power", "Required power, produced power, and balance.", rows)
 
 
 def _notes_section(building_data: dict[str, Any]) -> str:

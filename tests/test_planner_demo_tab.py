@@ -29,6 +29,9 @@ def test_planner_demo_sections_include_summary_and_readable_outputs():
     assert "30 planks" in joined_sections
     assert "10 planks/day" in joined_sections
     assert "Lumber Mill" in joined_sections
+    assert "Total required power" in joined_sections
+    assert "Total produced power" in joined_sections
+    assert "Power deficit: 120" in joined_sections
     assert "{'planks': 30}" not in joined_sections
 
 

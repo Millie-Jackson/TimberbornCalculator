@@ -133,6 +133,20 @@ def test_power_balance_is_calculated():
     assert result.power_required == 0
     assert result.power_produced == 100
     assert result.power_balance == 100
+    assert result.power_status == "surplus"
+    assert result.power_message == "Power surplus: 100"
+
+
+def test_planner_reports_deficit_status_for_power_consumers():
+    result = plan_building_addition(
+        load_faction_data("folktails"),
+        load_global_data(),
+        "gear_workshop",
+    )
+
+    assert result.power_balance == -120
+    assert result.power_status == "deficit"
+    assert result.power_message == "Power deficit: 120"
 
 
 def test_invalid_building_id_raises_clear_value_error():

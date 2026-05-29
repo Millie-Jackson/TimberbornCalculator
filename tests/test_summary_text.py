@@ -52,20 +52,36 @@ def test_gear_workshop_summary_includes_power_requirement():
     assert "Power required: 120." in summary
 
 
+def test_gear_workshop_summary_includes_power_produced():
+    summary = _gear_workshop_summary()
+
+    assert "Power produced: 0." in summary
+
+
 def test_upstream_dependencies_are_included():
     summary = _gear_workshop_summary()
 
     assert "It also depends on: Lumber Mill." in summary
 
 
-def test_power_gap_is_included_when_power_balance_is_negative():
+def test_power_deficit_is_included_when_power_balance_is_negative():
     plan_result = plan_building_addition(
         load_faction_data("folktails"),
         load_global_data(),
         "gear_workshop",
     )
 
-    assert "Power gap: 120." in format_power_summary(plan_result)
+    assert "Power deficit: 120" in format_power_summary(plan_result)
+
+
+def test_power_surplus_is_included_when_power_balance_is_positive():
+    plan_result = plan_building_addition(
+        load_faction_data("folktails"),
+        load_global_data(),
+        "power_wheel",
+    )
+
+    assert "Power surplus: 50" in format_power_summary(plan_result)
 
 
 def test_summary_does_not_expose_raw_python_dictionaries():
