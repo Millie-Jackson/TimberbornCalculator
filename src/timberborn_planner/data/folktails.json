@@ -178,5 +178,16 @@
             ],
             "notes": "Placeholder value: construction cost needs Timberborn 1.0 verification."
         }
+    },
+    "crops": {
+        "carrots": {
+            "name": "Carrots",
+            "resource": "carrots",
+            "yield_per_tile": 3,
+            "growth_days": 4,
+            "notes": [
+                "Placeholder values until Timberborn 1.0 crop values are verified."
+            ]
+        }
     }
 }
