@@ -10,13 +10,19 @@
                 "science": 20
             },
             "workers": 2,
+            "job_type": "industry_worker",
             "inputs_per_day": {
                 "logs": 10
             },
             "outputs_per_day": {
                 "planks": 5
             },
-            "power_required": 50
+            "power_required": 50,
+            "power_produced": 0,
+            "upstream_dependencies": [],
+            "wellbeing": {},
+            "automation_hints": [],
+            "notes": "Existing starter value. Power source is modelled through power_required, not a fixed building dependency."
         },
         "gear_workshop": {
             "name": "Gear Workshop",
@@ -28,13 +34,149 @@
                 "science": 30
             },
             "workers": 4,
+            "job_type": "industry_worker",
             "inputs_per_day": {
                 "planks": 10
             },
             "outputs_per_day": {
                 "gears": 5
             },
-            "power_required": 120
+            "power_required": 120,
+            "power_produced": 0,
+            "upstream_dependencies": [
+                "lumber_mill"
+            ],
+            "wellbeing": {},
+            "automation_hints": [],
+            "notes": "Existing starter value. Power source is modelled through power_required, not a fixed building dependency."
+        },
+        "farmhouse": {
+            "name": "Farmhouse",
+            "category": "farming",
+            "construction_cost": {
+                "logs": 25
+            },
+            "science_cost": {},
+            "workers": 2,
+            "job_type": "farmer",
+            "inputs_per_day": {},
+            "outputs_per_day": {},
+            "power_required": 0,
+            "power_produced": 0,
+            "upstream_dependencies": [],
+            "wellbeing": {},
+            "automation_hints": [],
+            "notes": "Placeholder values: construction cost and worker count need Timberborn 1.0 verification. Farm tile and crop output modelling is planned separately."
+        },
+        "water_pump": {
+            "name": "Water Pump",
+            "category": "water",
+            "construction_cost": {
+                "logs": 12
+            },
+            "science_cost": {},
+            "workers": 1,
+            "job_type": "water_worker",
+            "inputs_per_day": {},
+            "outputs_per_day": {
+                "water": 15
+            },
+            "power_required": 0,
+            "power_produced": 0,
+            "upstream_dependencies": [],
+            "wellbeing": {},
+            "automation_hints": [
+                {
+                    "problem": "low_water_storage",
+                    "suggestion": "Add water storage before long droughts."
+                }
+            ],
+            "notes": "Placeholder values: construction cost and water output rate need Timberborn 1.0 verification."
+        },
+        "small_warehouse": {
+            "name": "Small Warehouse",
+            "category": "storage",
+            "construction_cost": {
+                "logs": 15
+            },
+            "science_cost": {},
+            "workers": 0,
+            "inputs_per_day": {},
+            "outputs_per_day": {},
+            "power_required": 0,
+            "power_produced": 0,
+            "upstream_dependencies": [],
+            "wellbeing": {},
+            "automation_hints": [],
+            "notes": "Placeholder value: construction cost needs Timberborn 1.0 verification. Storage capacity is not modelled yet."
+        },
+        "small_water_tank": {
+            "name": "Small Water Tank",
+            "category": "storage",
+            "construction_cost": {
+                "logs": 15
+            },
+            "science_cost": {},
+            "workers": 0,
+            "inputs_per_day": {},
+            "outputs_per_day": {},
+            "power_required": 0,
+            "power_produced": 0,
+            "upstream_dependencies": [],
+            "wellbeing": {},
+            "automation_hints": [
+                {
+                    "problem": "low_water_storage",
+                    "suggestion": "Build water tanks before drought risk increases."
+                }
+            ],
+            "notes": "Placeholder value: construction cost needs Timberborn 1.0 verification. Water storage capacity is not modelled yet."
+        },
+        "inventor": {
+            "name": "Inventor",
+            "category": "science",
+            "construction_cost": {
+                "logs": 12,
+                "planks": 8
+            },
+            "science_cost": {},
+            "workers": 1,
+            "job_type": "inventor",
+            "inputs_per_day": {},
+            "outputs_per_day": {
+                "science": 3
+            },
+            "power_required": 0,
+            "power_produced": 0,
+            "upstream_dependencies": [
+                "lumber_mill"
+            ],
+            "wellbeing": {},
+            "automation_hints": [],
+            "notes": "Placeholder values: construction cost and science output rate need Timberborn 1.0 verification."
+        },
+        "power_wheel": {
+            "name": "Power Wheel",
+            "category": "power",
+            "construction_cost": {
+                "logs": 40
+            },
+            "science_cost": {},
+            "workers": 1,
+            "job_type": "power_worker",
+            "inputs_per_day": {},
+            "outputs_per_day": {},
+            "power_required": 0,
+            "power_produced": 50,
+            "upstream_dependencies": [],
+            "wellbeing": {},
+            "automation_hints": [
+                {
+                    "problem": "power_deficit",
+                    "suggestion": "Add power production before expanding powered industry."
+                }
+            ],
+            "notes": "Placeholder value: construction cost needs Timberborn 1.0 verification."
         }
     }
 }
